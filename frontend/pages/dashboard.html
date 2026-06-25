@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Job Co-Pilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i class="ti ti-briefcase"></i></div>
+      <div>
+        <div class="logo-text">Job Co-Pilot</div>
+        <div class="logo-sub">AI Application Kit</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" href="dashboard.html"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+      <a class="nav-item" href="new-application.html"><i class="ti ti-plus"></i> New Application</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="sidebar-avatar">U</div>
+        <span class="user-name" id="sidebar-user-name">Loading…</span>
+        <button class="logout-btn" id="logout-btn" title="Sign out"><i class="ti ti-logout"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="page-header">
+      <h1>My Applications</h1>
+      <a href="new-application.html" class="btn btn-primary btn-sm">
+        <i class="ti ti-plus"></i> New Application
+      </a>
+    </div>
+    <div class="page-body">
+
+      <!-- Stats -->
+      <div class="grid-2" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
+        <div class="card" style="text-align:center">
+          <div style="font-size:1.75rem;font-weight:700" id="stat-total">—</div>
+          <div class="text-muted text-sm">Total</div>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:1.75rem;font-weight:700;color:var(--accent)" id="stat-applied">—</div>
+          <div class="text-muted text-sm">Applied</div>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:1.75rem;font-weight:700;color:var(--amber)" id="stat-interviewed">—</div>
+          <div class="text-muted text-sm">Interviews</div>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:1.75rem;font-weight:700;color:var(--green)" id="stat-pending">—</div>
+          <div class="text-muted text-sm">Pending</div>
+        </div>
+      </div>
+
+      <!-- Filter -->
+      <div style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm"  onclick="filterRoles('all')">All</button>
+        <button class="btn btn-secondary btn-sm" onclick="filterRoles('not_yet')">Not Applied</button>
+        <button class="btn btn-secondary btn-sm" onclick="filterRoles('applied')">Applied</button>
+        <button class="btn btn-secondary btn-sm" onclick="filterRoles('interviewed')">Interviewed</button>
+        <button class="btn btn-secondary btn-sm" onclick="filterRoles('rejected')">Rejected</button>
+      </div>
+
+      <!-- Roles list -->
+      <div class="roles-grid" id="roles-list">
+        <div class="empty-state">
+          <div class="spinner"></div>
+          <p>Loading…</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="../js/app.js"></script>
+<script>
+  Auth.requireAuth();
+  initSidebar();
+
+  let allRoles = [];
+
+  async function loadRoles() {
+    try {
+      allRoles = await apiFetch('/applications/');
+      renderRoles(allRoles);
+      updateStats(allRoles);
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  function updateStats(roles) {
+    document.getElementById('stat-total').textContent       = roles.length;
+    document.getElementById('stat-applied').textContent     = roles.filter(r => r.status === 'applied').length;
+    document.getElementById('stat-interviewed').textContent = roles.filter(r => r.status === 'interviewed').length;
+    document.getElementById('stat-pending').textContent     = roles.filter(r => r.status === 'not_yet').length;
+  }
+
+  function filterRoles(status) {
+    const filtered = status === 'all' ? allRoles : allRoles.filter(r => r.status === status);
+    renderRoles(filtered);
+  }
+
+  function renderRoles(roles) {
+    const list = document.getElementById('roles-list');
+    if (!roles.length) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon"><i class="ti ti-briefcase"></i></div>
+          <div class="empty-title">No applications yet</div>
+          <p>Upload your resume and a job description to get started.</p>
+          <a href="new-application.html" class="btn btn-primary mt-2">
+            <i class="ti ti-plus"></i> Add Application
+          </a>
+        </div>`;
+      return;
+    }
+    list.innerHTML = roles.map(role => `
+      <div class="role-card" onclick="window.location='artifacts.html?role=${role.id}'">
+        <div class="role-icon"><i class="ti ti-building"></i></div>
+        <div class="role-info">
+          <div class="role-title">${escHtml(role.job_title)}</div>
+          <div class="role-company">${escHtml(role.company)}</div>
+          <div class="role-meta">
+            ${statusBadge(role.status)}
+            <span class="text-sm text-muted">${fmtDate(role.created_at)}</span>
+            ${followUpNote(role.follow_up_date)}
+          </div>
+        </div>
+        <div class="role-actions" onclick="event.stopPropagation()">
+          <select class="form-control" style="font-size:.78rem;padding:.3rem .5rem;width:auto"
+            onchange="updateStatus(${role.id}, this.value)">
+            <option value="not_yet"     ${role.status==='not_yet'?'selected':''}>Not Applied</option>
+            <option value="applied"     ${role.status==='applied'?'selected':''}>Applied</option>
+            <option value="interviewed" ${role.status==='interviewed'?'selected':''}>Interviewed</option>
+            <option value="rejected"    ${role.status==='rejected'?'selected':''}>Rejected</option>
+          </select>
+          <button class="btn btn-danger btn-sm" onclick="deleteRole(${role.id}, event)">
+            <i class="ti ti-trash"></i>
+          </button>
+        </div>
+      </div>`).join('');
+  }
+
+  async function updateStatus(roleId, status) {
+    try {
+      await apiFetch(`/applications/${roleId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status })
+      });
+      toast('Status updated', 'success');
+      await loadRoles();
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  async function deleteRole(roleId, e) {
+    e.stopPropagation();
+    if (!confirm('Delete this application?')) return;
+    try {
+      await apiFetch(`/applications/${roleId}`, { method: 'DELETE' });
+      toast('Deleted', 'success');
+      await loadRoles();
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  loadRoles();
+</script>
+</body>
+</html>

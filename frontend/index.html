@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Co-Pilot — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-icon"><i class="ti ti-briefcase"></i></div>
+      <div style="font-size:1rem;font-weight:600">Job Co-Pilot</div>
+    </div>
+
+    <!-- Login -->
+    <div id="login-view">
+      <h1>Welcome back</h1>
+      <p class="sub">Sign in to manage your applications</p>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input id="login-email" type="email" class="form-control" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input id="login-pw" type="password" class="form-control" placeholder="••••••••">
+      </div>
+      <button id="login-btn" class="btn btn-primary btn-full" onclick="doLogin()">
+        Sign in
+      </button>
+      <p class="auth-switch">No account? <a href="#" onclick="toggleView('register')">Create one</a></p>
+    </div>
+
+    <!-- Register -->
+    <div id="register-view" style="display:none">
+      <h1>Create account</h1>
+      <p class="sub">Start tailoring your applications with AI</p>
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input id="reg-name" type="text" class="form-control" placeholder="Your Name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input id="reg-email" type="email" class="form-control" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input id="reg-pw" type="password" class="form-control" placeholder="Min 8 characters">
+      </div>
+      <button class="btn btn-primary btn-full" onclick="doRegister()">
+        Create account
+      </button>
+      <p class="auth-switch">Already have an account? <a href="#" onclick="toggleView('login')">Sign in</a></p>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  Auth.redirectIfLoggedIn();
+
+  function toggleView(view) {
+    document.getElementById('login-view').style.display    = view === 'login'    ? 'block' : 'none';
+    document.getElementById('register-view').style.display = view === 'register' ? 'block' : 'none';
+  }
+
+  async function doLogin() {
+    const btn = document.getElementById('login-btn');
+    btn.disabled = true; btn.textContent = 'Signing in…';
+    try {
+      const data = await apiFetch('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({
+          email:    document.getElementById('login-email').value,
+          password: document.getElementById('login-pw').value,
+        })
+      });
+      Auth.setToken(data.access_token);
+      const me = await apiFetch('/auth/me');
+      Auth.setUser(me);
+      window.location.href = 'pages/dashboard.html';
+    } catch(e) {
+      toast(e.message, 'error');
+      btn.disabled = false; btn.textContent = 'Sign in';
+    }
+  }
+
+  async function doRegister() {
+    try {
+      await apiFetch('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          full_name: document.getElementById('reg-name').value,
+          email:     document.getElementById('reg-email').value,
+          password:  document.getElementById('reg-pw').value,
+        })
+      });
+      toast('Account created! Sign in now.', 'success');
+      toggleView('login');
+    } catch(e) {
+      toast(e.message, 'error');
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const loginVisible = document.getElementById('login-view').style.display !== 'none';
+      if (loginVisible) doLogin(); else doRegister();
+    }
+  });
+</script>
+</body>
+</html>

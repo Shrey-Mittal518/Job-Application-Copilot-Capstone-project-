@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Kit — Job Co-Pilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i class="ti ti-briefcase"></i></div>
+      <div>
+        <div class="logo-text">Job Co-Pilot</div>
+        <div class="logo-sub">AI Application Kit</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="dashboard.html"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+      <a class="nav-item" href="new-application.html"><i class="ti ti-plus"></i> New Application</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="sidebar-avatar">U</div>
+        <span class="user-name" id="sidebar-user-name">Loading…</span>
+        <button class="logout-btn" id="logout-btn"><i class="ti ti-logout"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <h1 id="page-title">Application Kit</h1>
+        <div class="text-muted text-sm" id="page-subtitle"></div>
+      </div>
+      <a href="dashboard.html" class="btn btn-secondary btn-sm">
+        <i class="ti ti-arrow-left"></i> Back
+      </a>
+    </div>
+    <div class="page-body">
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <div class="tab active" data-tab="tab-fit">🎯 Fit Analysis</div>
+        <div class="tab" data-tab="tab-resume">📄 Resume</div>
+        <div class="tab" data-tab="tab-cover">✉️ Cover Letter</div>
+        <div class="tab" data-tab="tab-interview">🎤 Interview</div>
+        <div class="tab" data-tab="tab-ats">📊 ATS Score</div>
+        <div class="tab" data-tab="tab-diff">🔀 Diff View</div>
+        <div class="tab" data-tab="tab-voice">🎙️ Voice Practice</div>
+        <div class="tab" data-tab="tab-salary">💰 Salary Coach</div>
+      </div>
+
+      <!-- Fit Analysis -->
+      <div class="tab-panel active" id="tab-fit">
+        <div class="artifact-header">
+          <div class="artifact-title">🎯 Fit Analysis</div>
+          <button class="btn btn-secondary btn-sm" onclick="regenerate('fit')">
+            <i class="ti ti-refresh"></i> Regenerate
+          </button>
+        </div>
+        <div class="artifact-section" id="fit-content">Loading…</div>
+      </div>
+
+      <!-- Resume -->
+      <div class="tab-panel" id="tab-resume">
+        <div class="artifact-header">
+          <div class="artifact-title">📄 Tailored Resume</div>
+          <div style="display:flex;gap:.5rem">
+            <button class="btn btn-secondary btn-sm" onclick="regenerate('resume')">
+              <i class="ti ti-refresh"></i> Regenerate
+            </button>
+            <button class="btn btn-green btn-sm" onclick="downloadResume()">
+              <i class="ti ti-download"></i> Download PDF
+            </button>
+          </div>
+        </div>
+        <div class="artifact-section" id="resume-content">Loading…</div>
+      </div>
+
+      <!-- Cover Letter -->
+      <div class="tab-panel" id="tab-cover">
+        <div class="artifact-header">
+          <div class="artifact-title">✉️ Cover Letter</div>
+          <div style="display:flex;gap:.5rem">
+            <button class="btn btn-secondary btn-sm" onclick="regenerate('cover')">
+              <i class="ti ti-refresh"></i> Regenerate
+            </button>
+            <button class="btn btn-green btn-sm" onclick="downloadCoverLetter()">
+              <i class="ti ti-download"></i> Download .docx
+            </button>
+          </div>
+        </div>
+        <div class="artifact-section" id="cover-content">Loading…</div>
+      </div>
+
+      <!-- Interview Q&A -->
+      <div class="tab-panel" id="tab-interview">
+        <div class="artifact-header">
+          <div class="artifact-title">🎤 Interview Q&amp;A</div>
+          <button class="btn btn-secondary btn-sm" onclick="regenerate('interview')">
+            <i class="ti ti-refresh"></i> Regenerate
+          </button>
+        </div>
+        <div id="interview-content">Loading…</div>
+      </div>
+
+      <!-- ATS Score -->
+      <div class="tab-panel" id="tab-ats">
+        <div class="artifact-header">
+          <div class="artifact-title">📊 ATS Score</div>
+          <button class="btn btn-secondary btn-sm" onclick="regenerate('ats')">
+            <i class="ti ti-refresh"></i> Regenerate
+          </button>
+        </div>
+        <div class="card" id="ats-content">Loading…</div>
+      </div>
+
+      <!-- Diff View -->
+      <div class="tab-panel" id="tab-diff">
+        <div class="artifact-header">
+          <div class="artifact-title">🔀 Resume Diff — Before vs After</div>
+        </div>
+        <div id="diff-content">Loading…</div>
+      </div>
+
+      <!-- Voice Practice -->
+      <div class="tab-panel" id="tab-voice">
+        <div class="artifact-title" style="margin-bottom:1rem">🎙️ Voice Mock Interview</div>
+        <div class="card" style="margin-bottom:1rem">
+          <div class="form-group">
+            <label class="form-label">Select a question to practice</label>
+            <select id="voice-question-select" class="form-control" onchange="onQuestionSelect()">
+              <option value="">— Load questions first —</option>
+            </select>
+          </div>
+          <div id="voice-question-text" style="font-weight:500;margin-bottom:1rem;display:none"></div>
+          <div id="voice-transcript" class="artifact-section" style="min-height:80px;font-style:italic;color:var(--text-2)">
+            Your answer will appear here…
+          </div>
+          <div style="display:flex;gap:.5rem;margin-top:.75rem;align-items:center">
+            <button class="btn btn-primary" id="record-btn" onclick="toggleRecording()">
+              <i class="ti ti-microphone"></i> Start Recording
+            </button>
+            <button class="btn btn-secondary" id="grade-btn" onclick="gradeAnswer()" style="display:none">
+              <i class="ti ti-star"></i> Grade My Answer
+            </button>
+            <div id="recording-indicator" style="display:none">
+              <div style="display:flex;align-items:center;gap:6px;color:var(--red);font-size:.85rem">
+                <div class="recording-dot"></div> Recording…
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="grade-result" style="display:none" class="card">
+          <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:.75rem">
+            <span style="font-size:2rem;font-weight:700;color:var(--accent)" id="grade-score">—</span>
+            <span class="text-muted">/10</span>
+          </div>
+          <p id="grade-feedback" style="font-size:.9rem;margin-bottom:.75rem"></p>
+          <div style="font-weight:500;font-size:.85rem;margin-bottom:.4rem">💡 Improved answer:</div>
+          <div id="grade-improved" class="artifact-section" style="min-height:60px"></div>
+        </div>
+      </div>
+
+      <!-- Salary Coach -->
+      <div class="tab-panel" id="tab-salary">
+        <div class="artifact-title" style="margin-bottom:1rem">💰 Salary Negotiation Coach</div>
+        <div class="card" style="margin-bottom:1rem">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Role Title</label>
+              <input id="salary-role" class="form-control" placeholder="Software Engineer">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Current Offer</label>
+              <input id="salary-offer" class="form-control" placeholder="₹12 LPA or $90,000">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Location (optional)</label>
+            <input id="salary-location" class="form-control" placeholder="Bangalore, India">
+          </div>
+          <button class="btn btn-primary" onclick="getSalaryCoach()" id="salary-btn">
+            <i class="ti ti-coin"></i> Get Negotiation Scripts
+          </button>
+        </div>
+        <div id="salary-result" class="artifact-section" style="display:none"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="../js/app.js"></script>
+<script>
+  Auth.requireAuth();
+  initSidebar();
+  initTabs();
+
+  const roleId = getRoleId();
+  if (!roleId) window.location.href = 'dashboard.html';
+
+  let currentDraft = null;
+  let currentRole  = null;
+  let recognition  = null;
+  let isRecording  = false;
+  let transcript   = '';
+
+  async function loadData() {
+    try {
+      currentRole  = await apiFetch(`/applications/${roleId}`);
+      currentDraft = await apiFetch(`/drafts/${roleId}`);
+
+      document.getElementById('page-title').textContent    = currentRole.job_title;
+      document.getElementById('page-subtitle').textContent = currentRole.company;
+
+      renderAll();
+    } catch(e) { toast(e.message, 'error'); }
+  }
+
+  function renderAll() {
+    // Fit
+    document.getElementById('fit-content').textContent = currentDraft.fit_analysis || 'Not generated yet.';
+
+    // Resume
+    document.getElementById('resume-content').textContent = currentDraft.resume_rewrite || 'Not generated yet.';
+
+    // Cover Letter
+    document.getElementById('cover-content').textContent = currentDraft.cover_letter || 'Not generated yet.';
+
+    // Interview Q&A
+    document.getElementById('interview-content').innerHTML = renderQA(currentDraft.interview_qa);
+
+    // ATS
+    document.getElementById('ats-content').innerHTML = renderATS(currentDraft.ats_score, currentDraft.ats_missing_kw);
+
+    // Diff
+    document.getElementById('diff-content').innerHTML = renderDiff(
+      currentRole.original_resume || '',
+      currentDraft.resume_rewrite || ''
+    );
+
+    // Voice questions
+    populateVoiceQuestions(currentDraft.interview_qa);
+
+    // Salary prefill
+    document.getElementById('salary-role').value = currentRole.job_title;
+
+    // Show saved salary scripts
+    if (currentDraft.salary_scripts) {
+      document.getElementById('salary-result').textContent = currentDraft.salary_scripts;
+      document.getElementById('salary-result').style.display = 'block';
+    }
+  }
+
+  async function regenerate(section) {
+    const btn = event.target.closest('button');
+    btn.disabled = true; btn.textContent = 'Regenerating…';
+    try {
+      currentDraft = await apiFetch(`/drafts/${roleId}/regenerate`, {
+        method: 'POST',
+        body: JSON.stringify({ section })
+      });
+      renderAll();
+      toast('Regenerated!', 'success');
+    } catch(e) {
+      toast(e.message, 'error');
+    } finally {
+      btn.disabled = false; btn.innerHTML = '<i class="ti ti-refresh"></i> Regenerate';
+    }
+  }
+
+  function downloadCoverLetter() {
+    window.open(`${API}/drafts/${roleId}/download/cover-letter?token=${Auth.getToken()}`, '_blank');
+    // Use fetch with auth header
+    fetch(`${API}/drafts/${roleId}/download/cover-letter`, {
+      headers: { Authorization: `Bearer ${Auth.getToken()}` }
+    }).then(r => r.blob()).then(blob => {
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href    = url;
+      a.download = `cover_letter_${currentRole.company}.docx`;
+      a.click();
+    });
+  }
+
+  function downloadResume() {
+    fetch(`${API}/drafts/${roleId}/download/resume`, {
+      headers: { Authorization: `Bearer ${Auth.getToken()}` }
+    }).then(r => r.blob()).then(blob => {
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href    = url;
+      a.download = `resume_${currentRole.company}.pdf`;
+      a.click();
+    });
+  }
+
+  // ── Voice Interview ───────────────────────────────────────────
+  function populateVoiceQuestions(qaJson) {
+    let questions = [];
+    try { questions = JSON.parse(qaJson || '[]'); } catch {}
+    const select = document.getElementById('voice-question-select');
+    select.innerHTML = '<option value="">— Select a question —</option>' +
+      questions.map((q, i) => `<option value="${i}">${i+1}. ${escHtml(q.question)}</option>`).join('');
+    select._questions = questions;
+  }
+
+  function onQuestionSelect() {
+    const select = document.getElementById('voice-question-select');
+    const idx    = select.value;
+    if (idx === '') return;
+    const q = select._questions[idx];
+    document.getElementById('voice-question-text').textContent = q.question;
+    document.getElementById('voice-question-text').style.display = 'block';
+    document.getElementById('voice-transcript').textContent = 'Your answer will appear here…';
+    document.getElementById('grade-result').style.display = 'none';
+    document.getElementById('grade-btn').style.display = 'none';
+    transcript = '';
+  }
+
+  function toggleRecording() {
+    if (isRecording) stopRecording(); else startRecording();
+  }
+
+  function startRecording() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast('Speech recognition not supported in this browser. Use Chrome.', 'error');
+      return;
+    }
+    recognition = new SpeechRecognition();
+    recognition.continuous    = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (e) => {
+      transcript = Array.from(e.results).map(r => r[0].transcript).join(' ');
+      document.getElementById('voice-transcript').textContent = transcript;
+    };
+
+    recognition.start();
+    isRecording = true;
+    document.getElementById('record-btn').innerHTML = '<i class="ti ti-player-stop"></i> Stop Recording';
+    document.getElementById('record-btn').classList.replace('btn-primary', 'btn-danger');
+    document.getElementById('recording-indicator').style.display = 'block';
+  }
+
+  function stopRecording() {
+    if (recognition) recognition.stop();
+    isRecording = false;
+    document.getElementById('record-btn').innerHTML = '<i class="ti ti-microphone"></i> Start Recording';
+    document.getElementById('record-btn').classList.replace('btn-danger', 'btn-primary');
+    document.getElementById('recording-indicator').style.display = 'none';
+    if (transcript) document.getElementById('grade-btn').style.display = 'inline-flex';
+  }
+
+  async function gradeAnswer() {
+    const select   = document.getElementById('voice-question-select');
+    const question = select._questions[select.value]?.question;
+    if (!question || !transcript) { toast('Record an answer first', 'error'); return; }
+
+    const btn = document.getElementById('grade-btn');
+    btn.disabled = true; btn.textContent = 'Grading…';
+
+    try {
+      const result = await apiFetch('/drafts/voice-grade', {
+        method: 'POST',
+        body: JSON.stringify({
+          question,
+          user_answer:     transcript,
+          resume_context:  currentRole.original_resume || ''
+        })
+      });
+      document.getElementById('grade-score').textContent    = result.score;
+      document.getElementById('grade-feedback').textContent = result.feedback;
+      document.getElementById('grade-improved').textContent = result.improved_answer;
+      document.getElementById('grade-result').style.display = 'block';
+    } catch(e) {
+      toast(e.message, 'error');
+    } finally {
+      btn.disabled = false; btn.innerHTML = '<i class="ti ti-star"></i> Grade My Answer';
+    }
+  }
+
+  // ── Salary Coach ──────────────────────────────────────────────
+  async function getSalaryCoach() {
+    const btn = document.getElementById('salary-btn');
+    btn.disabled = true; btn.textContent = 'Generating scripts…';
+    try {
+      const result = await apiFetch(`/drafts/${roleId}/salary`, {
+        method: 'POST',
+        body: JSON.stringify({
+          role_title:    document.getElementById('salary-role').value,
+          current_offer: document.getElementById('salary-offer').value,
+          location:      document.getElementById('salary-location').value,
+        })
+      });
+      document.getElementById('salary-result').textContent    = result.salary_scripts;
+      document.getElementById('salary-result').style.display  = 'block';
+      toast('Salary scripts ready!', 'success');
+    } catch(e) {
+      toast(e.message, 'error');
+    } finally {
+      btn.disabled = false; btn.innerHTML = '<i class="ti ti-coin"></i> Get Negotiation Scripts';
+    }
+  }
+
+  loadData();
+</script>
+</body>
+</html>

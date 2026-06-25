@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Application — Job Co-Pilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i class="ti ti-briefcase"></i></div>
+      <div>
+        <div class="logo-text">Job Co-Pilot</div>
+        <div class="logo-sub">AI Application Kit</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="dashboard.html"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+      <a class="nav-item active" href="new-application.html"><i class="ti ti-plus"></i> New Application</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="sidebar-avatar">U</div>
+        <span class="user-name" id="sidebar-user-name">Loading…</span>
+        <button class="logout-btn" id="logout-btn"><i class="ti ti-logout"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="page-header">
+      <h1>New Application</h1>
+      <a href="dashboard.html" class="btn btn-secondary btn-sm">
+        <i class="ti ti-arrow-left"></i> Back
+      </a>
+    </div>
+    <div class="page-body" style="max-width:720px">
+
+      <!-- Form -->
+      <div id="form-view">
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-title"><i class="ti ti-file-cv" style="color:var(--accent)"></i> Resume</div>
+          <div class="upload-zone" id="upload-zone" onclick="document.getElementById('resume-file').click()">
+            <div class="upload-icon"><i class="ti ti-upload"></i></div>
+            <div>Click to upload your resume PDF</div>
+            <div class="text-muted text-sm">PDF only</div>
+            <div class="upload-selected" id="file-name"></div>
+          </div>
+          <input type="file" id="resume-file" accept=".pdf" style="display:none" onchange="onFileSelect(this)">
+        </div>
+
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-title"><i class="ti ti-id-badge" style="color:var(--accent)"></i> Role Details</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Job Title *</label>
+              <input id="job-title" class="form-control" placeholder="Software Engineer">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Company *</label>
+              <input id="company" class="form-control" placeholder="Google">
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:1.5rem">
+          <div class="card-title"><i class="ti ti-file-description" style="color:var(--accent)"></i> Job Description</div>
+          <div class="form-group">
+            <label class="form-label">Paste a job URL to auto-fill</label>
+            <div style="display:flex;gap:.5rem">
+              <input id="jd-url" class="form-control" placeholder="https://linkedin.com/jobs/view/...">
+              <button class="btn btn-secondary" onclick="scrapeJD()" id="scrape-btn" style="flex-shrink:0">
+                <i class="ti ti-link"></i> Fetch
+              </button>
+            </div>
+            <div class="form-hint">Works with LinkedIn, Greenhouse, Lever, Workday</div>
+          </div>
+          <div style="text-align:center;color:var(--text-3);font-size:.8rem;margin:.5rem 0">— or paste directly —</div>
+          <div class="form-group">
+            <label class="form-label">Job Description *</label>
+            <textarea id="jd-text" class="form-control textarea" style="min-height:180px"
+              placeholder="Paste the full job description here…"></textarea>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-full" onclick="submitApplication()" id="submit-btn"
+          style="font-size:1rem;padding:.75rem">
+          <i class="ti ti-robot"></i> Generate Application Kit
+        </button>
+        <p class="text-muted text-sm" style="text-align:center;margin-top:.5rem">
+          Runs 5 AI agents — takes about 30–60 seconds
+        </p>
+      </div>
+
+      <!-- Loading -->
+      <div id="loading-view" style="display:none">
+        <div class="card">
+          <div class="pipeline-loading">
+            <div class="spinner"></div>
+            <h2 style="font-size:1.1rem">Building your application kit…</h2>
+            <div style="display:flex;flex-direction:column;gap:.4rem;text-align:left">
+              <div class="loading-step active" id="step-1">⏳ Parsing your resume</div>
+              <div class="loading-step" id="step-2">○ Agent 1: Fit analysis</div>
+              <div class="loading-step" id="step-3">○ Agent 2: Resume rewrite</div>
+              <div class="loading-step" id="step-4">○ Agent 3: Cover letter</div>
+              <div class="loading-step" id="step-5">○ Agent 4: Interview Q&amp;A</div>
+              <div class="loading-step" id="step-6">○ Agent 5: ATS scoring</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="../js/app.js"></script>
+<script>
+  Auth.requireAuth();
+  initSidebar();
+
+  let selectedFile = null;
+
+  function onFileSelect(input) {
+    selectedFile = input.files[0];
+    document.getElementById('file-name').textContent = selectedFile ? `✓ ${selectedFile.name}` : '';
+    const zone = document.getElementById('upload-zone');
+    zone.style.borderColor = selectedFile ? 'var(--green)' : '';
+    zone.style.background  = selectedFile ? 'var(--green-bg)' : '';
+  }
+
+  // Drag and drop
+  const zone = document.getElementById('upload-zone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--accent)'; });
+  zone.addEventListener('dragleave', () => zone.style.borderColor = '');
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file?.type === 'application/pdf') {
+      selectedFile = file;
+      document.getElementById('file-name').textContent = `✓ ${file.name}`;
+    } else { toast('Please drop a PDF file', 'error'); }
+  });
+
+  async function scrapeJD() {
+    const url = document.getElementById('jd-url').value.trim();
+    if (!url) { toast('Enter a URL first', 'error'); return; }
+    const btn = document.getElementById('scrape-btn');
+    btn.disabled = true; btn.textContent = 'Fetching…';
+    try {
+      const data = await apiFetch('/scrape/jd', {
+        method: 'POST',
+        body: JSON.stringify({ url })
+      });
+      document.getElementById('jd-text').value = data.jd_text;
+      toast('Job description fetched!', 'success');
+    } catch(e) {
+      toast(e.message + ' — paste manually', 'error');
+    } finally {
+      btn.disabled = false; btn.innerHTML = '<i class="ti ti-link"></i> Fetch';
+    }
+  }
+
+  function animateSteps() {
+    const delays = [0, 3000, 12000, 20000, 28000, 36000];
+    delays.forEach((delay, i) => {
+      setTimeout(() => {
+        if (i > 0) {
+          const prev = document.getElementById(`step-${i}`);
+          if (prev) { prev.classList.remove('active'); prev.classList.add('done'); prev.textContent = `✓ ${prev.textContent.slice(2)}`; }
+        }
+        const cur = document.getElementById(`step-${i+1}`);
+        if (cur) { cur.classList.add('active'); }
+      }, delay);
+    });
+  }
+
+  async function submitApplication() {
+    if (!selectedFile) { toast('Upload your resume PDF first', 'error'); return; }
+    const title   = document.getElementById('job-title').value.trim();
+    const company = document.getElementById('company').value.trim();
+    const jdText  = document.getElementById('jd-text').value.trim();
+    const jdUrl   = document.getElementById('jd-url').value.trim();
+    if (!title || !company) { toast('Enter job title and company', 'error'); return; }
+    if (!jdText && !jdUrl)  { toast('Add a job description or URL', 'error'); return; }
+
+    document.getElementById('form-view').style.display    = 'none';
+    document.getElementById('loading-view').style.display = 'block';
+    animateSteps();
+
+    const fd = new FormData();
+    fd.append('resume_pdf', selectedFile);
+    fd.append('job_title',  title);
+    fd.append('company',    company);
+    fd.append('jd_text',    jdText);
+    fd.append('jd_url',     jdUrl);
+
+    try {
+      const role = await apiFetch('/applications/', {
+        method: 'POST',
+        body: fd,
+        headers: {}
+      });
+      toast('Application kit ready!', 'success');
+      window.location.href = `artifacts.html?role=${role.id}`;
+    } catch(e) {
+      toast(e.message, 'error');
+      document.getElementById('form-view').style.display    = 'block';
+      document.getElementById('loading-view').style.display = 'none';
+    }
+  }
+</script>
+</body>
+</html>
