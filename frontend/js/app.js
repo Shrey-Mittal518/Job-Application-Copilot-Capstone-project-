@@ -2,7 +2,7 @@ const API = window.location.hostname === '127.0.0.1' || window.location.hostname
   ? 'http://127.0.0.1:8000'
   : 'https://job-copilot-api-r38o.onrender.com';
 
-// ── Auth helpers ──────────────────────────────────────────────
+// Auth helpers 
 const Auth = {
   getToken:  () => localStorage.getItem('token'),
   setToken:  (t) => localStorage.setItem('token', t),
@@ -18,7 +18,7 @@ const Auth = {
   }
 };
 
-// ── API fetch wrapper ─────────────────────────────────────────
+//  API fetch wrapper 
 async function apiFetch(path, options = {}) {
   const token = Auth.getToken();
   const headers = { ...(options.headers || {}) };
@@ -33,7 +33,7 @@ async function apiFetch(path, options = {}) {
   return data;
 }
 
-// ── Toast ─────────────────────────────────────────────────────
+//  Toast 
 function toast(msg, type = 'info') {
   let container = document.getElementById('toast-container');
   if (!container) {
@@ -48,7 +48,7 @@ function toast(msg, type = 'info') {
   setTimeout(() => el.remove(), 3500);
 }
 
-// ── Status badge ──────────────────────────────────────────────
+//  Status badge 
 const STATUS_META = {
   not_yet:     { label: 'Not Applied', cls: 'badge-gray'  },
   applied:     { label: 'Applied',     cls: 'badge-blue'  },
@@ -60,7 +60,7 @@ function statusBadge(status) {
   return `<span class="badge ${m.cls}">${m.label}</span>`;
 }
 
-// ── Date helpers ──────────────────────────────────────────────
+//  Date helpers 
 function fmtDate(iso) {
   if (!iso) return '';
   return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -73,7 +73,7 @@ function followUpNote(date) {
   return `<span class="follow-up">Follow up in ${diff}d</span>`;
 }
 
-// ── Sidebar ───────────────────────────────────────────────────
+//  Sidebar 
 function initSidebar() {
   const user = Auth.getUser();
   if (user) {
@@ -86,7 +86,7 @@ function initSidebar() {
   if (logoutBtn) logoutBtn.onclick = () => { Auth.clear(); window.location.href = '../index.html'; };
 }
 
-// ── Tabs ──────────────────────────────────────────────────────
+//  Tabs 
 function initTabs() {
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -99,7 +99,7 @@ function initTabs() {
   });
 }
 
-// ── Diff renderer ─────────────────────────────────────────────
+// Diff renderer 
 function renderDiff(beforeText, afterText) {
   return `
     <div class="diff-container">
@@ -114,7 +114,7 @@ function renderDiff(beforeText, afterText) {
     </div>`;
 }
 
-// ── Q&A renderer ─────────────────────────────────────────────
+//  Q&A renderer 
 function renderQA(qaJson) {
   let questions = [];
   try {
@@ -136,7 +136,7 @@ function toggleQA(el) {
   el.nextElementSibling.classList.toggle('open');
 }
 
-// ── ATS renderer ──────────────────────────────────────────────
+//  ATS renderer 
 function renderATS(atsScore, atsMissingKw) {
   let ats = {};
   try { ats = JSON.parse(atsMissingKw || '{}'); } catch {}
@@ -161,7 +161,7 @@ function renderATS(atsScore, atsMissingKw) {
     ${recs ? `<p class="text-sm text-muted" style="margin:.75rem 0 .4rem">💡 Recommendations</p><ul style="padding-left:1.2rem">${recs}</ul>` : ''}`;
 }
 
-// ── Escape HTML ───────────────────────────────────────────────
+//  Escape HTML─
 function escHtml(str) {
   if (!str) return '';
   return String(str)
@@ -169,7 +169,7 @@ function escHtml(str) {
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Get role ID from URL ──────────────────────────────────────
+// Get role ID from URL 
 function getRoleId() {
   return new URLSearchParams(window.location.search).get('role');
 }
