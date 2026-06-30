@@ -173,13 +173,14 @@ ACCESS_TOKEN_EXPIRE_MINUTES=10080
 ```
 
 ## 📹 Demo Video
-[Link to Loom recording]
+https://www.loom.com/share/b7696a671ccf4c0c896ac1c135373e5a
 
 ## 🖥️ Live Demo
-[Link to deployed app]
+https://job-copilot-frontend-ywl4.onrender.com
+
 
 ## 📊 Presentation
-[Link to slides]
+https://docs.google.com/presentation/d/1eaChDHFTTwYNlKPzJQ5ZUzjR3v5ao5E4JMZECcNwel4/edit?usp=sharing
 
 ---
 
